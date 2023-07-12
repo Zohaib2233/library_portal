@@ -7,6 +7,7 @@ class MainScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    double height = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(
         title: Text('Library Portal'),
@@ -15,9 +16,14 @@ class MainScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
+            Image.asset("assets/images/library_logo.png",height: height*0.2),
+            SizedBox(
+              height: height*0.08,
+            ),
+            const Text(
               'Welcome to the Library Portal!',
-              style: TextStyle(fontSize: 24.0),
+              style: TextStyle(fontSize: 24.0,
+              fontWeight: FontWeight.w600),
             ),
             SizedBox(height: 20.0),
             ElevatedButton(
