@@ -1,7 +1,11 @@
-import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:flutter/material.dart';
+import 'package:library_portal/screens/functions.dart';
+//import 'package:firebase_auth/firebase_auth.dart';
+//import 'package:modal_progress_hud/modal_progress_hud.dart';
 
+import '../../data/generic_response_model.dart';
 import 'login.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -12,46 +16,68 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  @override
 
+  final  _auth = FirebaseAuth.instance;
   final _formKey = GlobalKey<FormState>();
+  TextEditingController _emailController = TextEditingController();
+  TextEditingController _passwordController = TextEditingController();
 
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  void initState() {
+    _emailController.text = "";
+    _passwordController.text = "";
+    super.initState();
+  }
 
-  final TextEditingController _emailController = TextEditingController();
-
-  final TextEditingController _passwordController = TextEditingController();
-
-  final TextEditingController _confirmPasswordController = TextEditingController();
 
   bool showProgress = false;
 
-  String? _validateEmail(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please enter an email address.';
-    }
-    if (!value.contains('@')) {
-      return 'Please enter a valid email address.';
-    }
-    return null;
-  }
-
-  String? _validatePassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please enter a password.';
-    }
-    if (value.length < 6) {
-      return 'Password must be at least 6 characters long.';
-    }
-    return null;
-  }
 
   void _showSnackBar(BuildContext context, String message) {
     final snackBar = SnackBar(
-      backgroundColor: Colors.lightBlueAccent,
+      backgroundColor: Colors.black,
       content: Text(message),
     );
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
+
+  _validate(){
+    setState(() {
+      showProgress = false;
+    });
+    showProgress = false;
+    if (_formKey.currentState!.validate()) {
+      final String email = _emailController.text.trim();
+      final String password = _passwordController.text.trim();
+      if (email.isEmpty ) {
+        _showSnackBar(context, "Email is required");
+      }
+      else if(password.isEmpty){
+        _showSnackBar(context, "Password is required");
+      }else{
+//Register with email and password
+    _auth.createUserWithEmailAndPassword(email: email, password: password).then((user){
+      //Add user Detail into collection in order to manage student and admin role
+      FirebaseOperation.addUser(isAdmin: false,callBack: (Response response){
+        if(response.code==200){
+               _showSnackBar(context, response.message.toString());
+              Navigator.push(context, MaterialPageRoute(builder: (context)=>LoginScreen()));
+        }else{
+               _showSnackBar(context, response.message.toString());
+        }
+      }, uid: user.user?.uid);
+
+        }).catchError((error){
+      _showSnackBar(context, error.message);
+
+    });
+
+
+      }
+
+
+    }
   }
 
   @override
@@ -61,9 +87,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       appBar: AppBar(
         title: const Text('Register'),
       ),
-      body: ModalProgressHUD(
-        inAsyncCall: showProgress,
-        child: Padding(
+      body:  Padding(
           padding: const EdgeInsets.all(20.0),
           child: Center(
             child: SingleChildScrollView(
@@ -76,100 +100,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     Image.asset("assets/images/library_logo.png",height: height*0.2),
                     TextFormField(
                       controller: _emailController,
-                      validator: _validateEmail,
+                     // validator: _validateEmail,
                       decoration: const InputDecoration(
                         hintText: 'Email',
                       ),
                     ),
                     const SizedBox(height: 20.0),
                     TextFormField(
-                      validator: _validatePassword,
+                     // validator: _validatePassword,
                       controller: _passwordController,
                       obscureText: true,
                       decoration: InputDecoration(
                         hintText: 'Password',
                       ),
                     ),
+                
                     const SizedBox(height: 20.0),
-                    TextFormField(
-
-                      obscureText: true,
-                      decoration: const InputDecoration(
-                        hintText: 'Confirm Password',
-                      ),
-                      controller: _confirmPasswordController,
-                      validator: (value) {
-                        if (value!.isEmpty) {
-                          return 'Please confirm your password';
-                        }
-                        if (value != _passwordController.text) {
-                          return 'Passwords do not match';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 20.0),
+                    showProgress?CircularProgressIndicator():
                     ElevatedButton(
                       onPressed: () async {
-
-                        if (_formKey.currentState!.validate()) {
-                          setState(() {
-                            showProgress=true;
-                          });
-                          final String email = _emailController.text.trim();
-                          final String password = _passwordController.text.trim();
-
-                          if (email.isEmpty || password.isEmpty) {
-                            return;
-                          }
-
-                          try {
-                            UserCredential userCredential =
-                            await _auth.createUserWithEmailAndPassword(
-                              email: email,
-                              password: password,
-                            );
-
-                            print('Registered user: ${userCredential.user}');
-                            bool isRegistrationSuccessful = true;
-
-                            if (isRegistrationSuccessful) {
-                              setState(() {
-                                showProgress=false;
-                              });
-
-                              _showSnackBar(context, 'User registered successfully!');
-                              Navigator.pushAndRemoveUntil(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => LoginScreen()),
-                                      (route) => false);
-
-                            } else {
-                            }
-
-                          } on FirebaseAuthException catch (e) {
-                            setState(() {
-                              showProgress=false;
-                            });
-
-                            if (e.code == 'weak-password') {
-                              _showSnackBar(context, "The password provided is too weak.");
-                              print('The password provided is too weak.');
-                            } else if (e.code == 'email-already-in-use') {
-                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                                backgroundColor: Colors.red,
-                                content: Text(
-                                  'The account already exists for that email.',
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                                duration: Duration(seconds: 1),
-                              ));
-                            }
-                          } catch (e) {
-                            print(e);
-                          }
-                        }
+                        _validate();
                       },
                       child: const Text('Register'),
                     ),
@@ -185,7 +135,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             ),
           ),
         ),
-      ),
+
     );
   }
 }
