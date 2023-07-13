@@ -1,44 +1,77 @@
 import 'package:flutter/material.dart';
+import 'package:library_portal/screens/registration/login.dart';
 
-import '../../data/books_data.dart';
-import 'booklist_screen.dart';
+import '../../models/library_model.dart';
+import 'bookdetail_screen.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+class HomeScreen extends StatelessWidget {
+  final Library library;
 
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
+  const HomeScreen({super.key, required this.library});
 
-class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Library Portal'),
+        title: Text('Library'),
+        centerTitle: true,
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'Welcome to the Library Portal!',
-              style: TextStyle(fontSize: 24.0),
+      drawer: Drawer(
+        child: ListView(
+          // Important: Remove any padding from the ListView.
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            UserAccountsDrawerHeader(
+              accountName: Text("Abhishek Mishra"),
+              accountEmail: Text("abhishekm977@gmail.com"),
+              currentAccountPicture: CircleAvatar(
+                backgroundColor: Colors.orange,
+                child: Text(
+                  "A",
+                  style: TextStyle(fontSize: 40.0),
+                ),
+              ),
             ),
-            SizedBox(height: 20.0),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => BookListScreen(library: dummyLibrary),
-                  ),
-                );
+            ListTile(
+              leading: Icon(Icons.home), title: Text("Home"),
+              onTap: () {
+                Navigator.pop(context);
               },
-              child: Text('View Books'),
+            ),
+            ListTile(
+              leading: Icon(Icons.settings), title: Text("Settings"),
+              onTap: () {
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.logout), title: Text("Logout"),
+              onTap: () {
+                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>LoginScreen()));
+              },
             ),
           ],
         ),
+      ),
+      body: ListView.builder(
+        itemCount: library.books.length,
+        itemBuilder: (context, index) {
+          return ListTile(
+            title: Text(library.books[index].title),
+            subtitle: Text(library.books[index].author),
+            trailing: library.books[index].isAvailable
+                ? Icon(Icons.check_circle, color: Colors.green)
+                : Icon(Icons.highlight_off, color: Colors.red),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => BookDetailsScreen(book: library.books[index]),
+                ),
+              );
+            },
+          );
+        },
       ),
     );
   }

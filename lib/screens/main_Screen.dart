@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:library_portal/screens/admin/admin_screen.dart';
+import 'package:library_portal/screens/admin/add_new_book_screen.dart';
 import 'package:library_portal/screens/registration/login.dart';
 
 class MainScreen extends StatelessWidget {
@@ -42,7 +42,7 @@ class MainScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const AdminScreen(),
+                    builder: (context) => const AddNewBookScreen(),
                   ),
                 );
               },

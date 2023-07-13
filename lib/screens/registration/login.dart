@@ -1,7 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:library_portal/screens/admin/add_new_book_screen.dart';
+import 'package:library_portal/screens/admin/booklist_screen.dart';
 import 'package:library_portal/screens/registration/registration.dart';
+import 'package:library_portal/screens/student/home_screen.dart';
+
+import '../../data/books_data.dart';
 
 class LoginScreen extends StatelessWidget {
   final  _auth = FirebaseAuth.instance;
@@ -19,7 +24,7 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    _validate(){
+    _validate() async {
       if (_formKey.currentState!.validate()) {
         final String email = _emailController.text.trim();
         final String password = _passwordController.text.trim();
@@ -30,11 +35,23 @@ class LoginScreen extends StatelessWidget {
           _showSnackBar(context, "Password is required");
         }else{
 //Login with email and password
-        _auth.signInWithEmailAndPassword(email: email, password: password).then((value) async {
-         final getUserData = await FirebaseFirestore.instance.collection("UserDetail");
+       await _auth.signInWithEmailAndPassword(email: email, password: password).then((value) async {
+         final getUserData = await FirebaseFirestore.instance.collection("UserDetail").doc(value.user?.uid).get();
+         if(getUserData.exists){
+           print(getUserData.data()?.values.first);
+           if(getUserData.data()?.values.first == false){
+             print("student");
+             Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>HomeScreen(library:dummyLibrary)));
+           }else{
+             print("admin");
+             Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>BookListScreen(library: dummyLibrary)));
+           }
+
+         }
+
 
         }).catchError((error){
-          _showSnackBar(context, error.message);
+          _showSnackBar(context, error.code.toString());
         });
 
 
@@ -46,9 +63,6 @@ class LoginScreen extends StatelessWidget {
     }
     double height = MediaQuery.of(context).size.height;
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Login'),
-      ),
       body: Padding(
         padding: EdgeInsets.all(20.0),
         child: Center(
@@ -62,12 +76,14 @@ class LoginScreen extends StatelessWidget {
 
                   TextField(
                     controller: _emailController,
+                    textInputAction: TextInputAction.next,
                     decoration: InputDecoration(
                       hintText: 'Email',
                     ),
                   ),
                   SizedBox(height: 20.0),
                   TextField(
+                    textInputAction: TextInputAction.done,
                     controller: _passwordController,
                     obscureText: true,
                     decoration: InputDecoration(
@@ -95,6 +111,21 @@ class LoginScreen extends StatelessWidget {
                       );
                     },
                     child: Text('Create an account'),
+                  ),
+                  Text("For admin testing"),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text("Email : "),
+                      Text("admin@gmail.com"),
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text("Password : "),
+                      Text("123456"),
+                    ],
                   ),
                 ],
               ),
