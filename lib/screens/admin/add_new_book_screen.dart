@@ -3,7 +3,6 @@ import 'package:library_portal/data/generic_response_model.dart';
 import 'package:library_portal/screens/admin/booklist_screen.dart';
 import 'package:library_portal/screens/functions.dart';
 
-import '../../data/books_data.dart';
 import '../../models/books_model.dart';
 
 class AddNewBookScreen extends StatefulWidget {
@@ -54,7 +53,7 @@ class _AddNewBookScreenState extends State<AddNewBookScreen> {
             _showSnackBar(context, response.message.toString());
           }
         }).whenComplete(() {
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>BookListScreen(library: dummyLibrary)));
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>BookListScreen()));
         }).catchError((e){
           _showSnackBar(context, e.message.toString());
         });
@@ -130,32 +129,7 @@ class _AddNewBookScreenState extends State<AddNewBookScreen> {
                         },
                         child: const Text('Add Book'),
                       ),
-                      const SizedBox(height: 20.0),
-                      ElevatedButton(
-                        onPressed: () {
-                          // Perform book removal logic here
-                          // Remove the book from the library
-                          dummyLibrary.books.removeLast();
 
-                          // Show a success message
-                          showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: const Text('Success'),
-                              content: const Text('The book has been removed successfully.'),
-                              actions: [
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                  },
-                                  child: const Text('OK'),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                        child: const Text('Remove Book'),
-                      ),
                     ],
                   ),
                 ),

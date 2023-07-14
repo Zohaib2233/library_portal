@@ -1,19 +1,28 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:library_portal/screens/registration/login.dart';
 
+import '../../models/books_model.dart';
 import '../../models/library_model.dart';
+import '../admin/edit_book_screen.dart';
+import '../functions.dart';
 import 'bookdetail_screen.dart';
 
-class HomeScreen extends StatelessWidget {
-  final Library library;
+class HomeScreen extends StatefulWidget {
+String? userId;
 
-  const HomeScreen({super.key, required this.library});
+HomeScreen(this.userId);
 
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Library'),
+        title: Text("Library"),
         centerTitle: true,
       ),
       drawer: Drawer(
@@ -53,26 +62,52 @@ class HomeScreen extends StatelessWidget {
           ],
         ),
       ),
-      body: ListView.builder(
-        itemCount: library.books.length,
-        itemBuilder: (context, index) {
-          return ListTile(
-            title: Text(library.books[index].title),
-            subtitle: Text(library.books[index].author),
-            trailing: library.books[index].isAvailable
-                ? Icon(Icons.check_circle, color: Colors.green)
-                : Icon(Icons.highlight_off, color: Colors.red),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => BookDetailsScreen(book: library.books[index]),
-                ),
+        body: FutureBuilder<List<QueryDocumentSnapshot<Map<String, dynamic>>>>(
+          future: FirebaseOperation().fetchAvailableBooksWhere(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(
+                child: CircularProgressIndicator(),
               );
-            },
-          );
-        },
-      ),
-    );
+            } else if (snapshot.hasError) {
+              return Center(
+                child: Text('Error: ${snapshot.error}'),
+              );
+            } else {
+              List<QueryDocumentSnapshot<Map<String, dynamic>>>?
+              availableBooks = snapshot.data;
+              if (availableBooks == null || availableBooks.isEmpty) {
+                return Center(
+                  child: Text('No available books found.'),
+                );
+              }
+              return ListView.builder(
+                itemCount: availableBooks.length,
+                itemBuilder: (context, index) {
+                  // Extract data from the DocumentSnapshot
+                  Map<String, dynamic> bookData = availableBooks[index].data();
+
+                  return ListTile(
+                    title: Text(bookData['book name']),
+                    subtitle: Text(bookData['author name']),
+                    trailing: ElevatedButton(
+                      onPressed: () async {
+                        setState(() {
+
+                        });
+                       await FirebaseOperation.updateBook(bookName: bookData['book name'], authorName: bookData['author name'], description: bookData['description'], isAvailable: bookData['isAvailable'], docId: snapshot.data?[index].id??"",isRequested: true,allocateTo: widget.userId);
+
+                      },
+                      child: Text("Request To Get"),
+                    ),
+                    leading: IconButton(onPressed: () async {
+                    },icon: Icon(Icons.circle,color: Colors.green,)),
+                    // Add additional widgets or cus{}tomize the ListTile as needed
+                  );
+                },
+              );
+            }
+          },
+        )    );
   }
 }

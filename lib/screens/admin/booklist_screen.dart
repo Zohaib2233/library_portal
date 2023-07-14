@@ -3,16 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:library_portal/screens/admin/add_new_book_screen.dart';
 import 'package:library_portal/screens/admin/edit_book_screen.dart';
 import 'package:library_portal/screens/functions.dart';
+import 'package:library_portal/screens/registration/login.dart';
 
 import '../../models/books_model.dart';
 import '../../models/library_model.dart';
 import '../student/bookdetail_screen.dart';
 
 class BookListScreen extends StatefulWidget {
-  final Library library;
 
-
-  BookListScreen({super.key, required this.library});
 
   @override
   State<BookListScreen> createState() => _BookListScreenState();
@@ -67,10 +65,10 @@ class _BookListScreenState extends State<BookListScreen> {
                 },
               ),
               ListTile(
-                leading: Icon(Icons.contacts),
-                title: Text("Contact Us"),
+                leading: Icon(Icons.logout),
+                title: Text("Logout"),
                 onTap: () {
-                  Navigator.pop(context);
+                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>LoginScreen()));
                 },
               ),
             ],
@@ -116,7 +114,11 @@ class _BookListScreenState extends State<BookListScreen> {
                         description: bookData['description'],
                         title: bookData['book name'],
                         author: bookData['author name'],
-                        isAvailable: bookData['isAvailable']
+                        isAvailable: bookData['isAvailable'],
+                      isRequested: bookData["isRequested"],
+                      allocatedTo: bookData["allocatedTo"],
+
+
                       ))));
                     },icon: Icon(Icons.edit)),
                     // Add additional widgets or cus{}tomize the ListTile as needed

@@ -3,7 +3,6 @@ import 'package:library_portal/data/generic_response_model.dart';
 import 'package:library_portal/screens/admin/booklist_screen.dart';
 import 'package:library_portal/screens/functions.dart';
 
-import '../../data/books_data.dart';
 import '../../models/books_model.dart';
 
 class EditBookScreen extends StatefulWidget {
@@ -58,7 +57,7 @@ class _EditBookScreenState extends State<EditBookScreen> {
       }
       else {
 
-        await FirebaseOperation.updateBook(docId:widget.book?.uid.toString()??"",bookName: title, authorName: author, description: description, isAvailable: isAvailable,callBack: (Response response){
+        await FirebaseOperation.updateBook(docId:widget.book?.uid.toString()??"",bookName: title, authorName: author, description: description, isRequested: false, isAvailable: isAvailable,callBack: (Response response){
           if(response==200){
           _showSnackBar(context, response.message.toString());
 
@@ -66,7 +65,7 @@ class _EditBookScreenState extends State<EditBookScreen> {
             _showSnackBar(context, response.message.toString());
           }
         }).whenComplete(() {
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>BookListScreen(library: dummyLibrary)));
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>BookListScreen()));
         }).catchError((e){
           _showSnackBar(context, e.message.toString());
         });

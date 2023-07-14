@@ -6,11 +6,11 @@ import 'package:library_portal/screens/admin/booklist_screen.dart';
 import 'package:library_portal/screens/registration/registration.dart';
 import 'package:library_portal/screens/student/home_screen.dart';
 
-import '../../data/books_data.dart';
 
 class LoginScreen extends StatelessWidget {
   final  _auth = FirebaseAuth.instance;
   final _formKey = GlobalKey<FormState>();
+  String? userId;
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
   void _showSnackBar(BuildContext context, String message) {
@@ -36,15 +36,16 @@ class LoginScreen extends StatelessWidget {
         }else{
 //Login with email and password
        await _auth.signInWithEmailAndPassword(email: email, password: password).then((value) async {
+         userId = value.user?.uid;
          final getUserData = await FirebaseFirestore.instance.collection("UserDetail").doc(value.user?.uid).get();
          if(getUserData.exists){
            print(getUserData.data()?.values.first);
            if(getUserData.data()?.values.first == false){
              print("student");
-             Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>HomeScreen(library:dummyLibrary)));
+             Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>HomeScreen(userId)));
            }else{
              print("admin");
-             Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>BookListScreen(library: dummyLibrary)));
+             Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>BookListScreen()));
            }
 
          }

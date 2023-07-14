@@ -46,6 +46,8 @@ class FirebaseOperation {
     required String authorName,
     required String description,
     required bool isAvailable,
+    bool isRequested = false,
+    String? allocateTo,
     Function? callBack,
   }) async {
     final CollectionReference _Collection = _firestore.collection('Book');
@@ -58,6 +60,8 @@ class FirebaseOperation {
       "author name": authorName,
       "description" : description,
       "isAvailable" : isAvailable,
+      "isRequested": isRequested,
+      "allocateTo" : allocateTo,
     };
 
     var result = await documentReferencer
@@ -77,12 +81,20 @@ class FirebaseOperation {
     return response;
   }
 
-  //read all data
+  //read all data where
 
+  Future<List<QueryDocumentSnapshot<Map<String, dynamic>>>> fetchAvailableBooksWhere() async {
+    QuerySnapshot<Map<String, dynamic>> querySnapshot = await FirebaseFirestore.instance
+        .collection('Book')
+        .where('isAvailable', isEqualTo: true).where("isRequested",isEqualTo: false)
+        .get();
+
+    return querySnapshot.docs;
+  }
+  //read all data
   Future<List<QueryDocumentSnapshot<Map<String, dynamic>>>> fetchAvailableBooks() async {
     QuerySnapshot<Map<String, dynamic>> querySnapshot = await FirebaseFirestore.instance
         .collection('Book')
-        .where('isAvailable', isEqualTo: true)
         .get();
 
     return querySnapshot.docs;
@@ -96,6 +108,8 @@ class FirebaseOperation {
     required String description,
     required bool isAvailable,
     required String docId,
+    required bool isRequested,
+    String? allocateTo,
     Function? callBack,
 
   }) async {
@@ -111,6 +125,8 @@ print(docId);
       "author name": authorName,
       "description" : description,
       "isAvailable" : isAvailable,
+      "isRequested": isRequested,
+      "allocateTo" : allocateTo,
     };
     print(data);
 
@@ -123,7 +139,7 @@ print(docId);
     })
         .catchError((e) {
       response.code = 500;
-      response.message = e;
+      response.message = e.toString();
       callBack!(response);
     });
 

@@ -4,6 +4,9 @@ class Book {
   final String author;
   final String description;
   final bool isAvailable;
+  final bool isRequested;
+  final String allocatedTo;
+
 
   Book({
      this.uid,
@@ -11,5 +14,7 @@ class Book {
     required this.author,
     required this.description,
     required this.isAvailable,
+    required this.isRequested,
+    required this.allocatedTo
   });
 }
