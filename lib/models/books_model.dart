@@ -6,6 +6,7 @@ class Book {
   final bool isAvailable;
   final bool isRequested;
   final String allocatedTo;
+  final String studentName;
 
 
   Book({
@@ -15,6 +16,7 @@ class Book {
     required this.description,
     required this.isAvailable,
     required this.isRequested,
-    required this.allocatedTo
+    required this.allocatedTo,
+    required this.studentName,
   });
 }

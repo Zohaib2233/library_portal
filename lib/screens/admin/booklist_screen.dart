@@ -2,12 +2,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:library_portal/screens/admin/add_new_book_screen.dart';
 import 'package:library_portal/screens/admin/edit_book_screen.dart';
+import 'package:library_portal/screens/admin/request_book_screen.dart';
 import 'package:library_portal/screens/functions.dart';
 import 'package:library_portal/screens/registration/login.dart';
 
 import '../../models/books_model.dart';
 import '../../models/library_model.dart';
-import '../student/bookdetail_screen.dart';
 
 class BookListScreen extends StatefulWidget {
 
@@ -40,8 +40,8 @@ class _BookListScreenState extends State<BookListScreen> {
             padding: EdgeInsets.zero,
             children: <Widget>[
               UserAccountsDrawerHeader(
-                accountName: Text("Abhishek Mishra"),
-                accountEmail: Text("abhishekm977@gmail.com"),
+                accountName: Text("Admin"),
+                accountEmail: Text("admin@gmail.com"),
                 currentAccountPicture: CircleAvatar(
                   backgroundColor: Colors.orange,
                   child: Text(
@@ -52,16 +52,9 @@ class _BookListScreenState extends State<BookListScreen> {
               ),
               ListTile(
                 leading: Icon(Icons.home),
-                title: Text("Home"),
+                title: Text("Book Request"),
                 onTap: () {
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.settings),
-                title: Text("Settings"),
-                onTap: () {
-                  Navigator.pop(context);
+                  Navigator.push(context, MaterialPageRoute(builder: (context)=>RequestBooksScreen()));
                 },
               ),
               ListTile(
@@ -75,7 +68,7 @@ class _BookListScreenState extends State<BookListScreen> {
           ),
         ),
         body: FutureBuilder<List<QueryDocumentSnapshot<Map<String, dynamic>>>>(
-          future: FirebaseOperation().fetchAvailableBooks(),
+          future: FirebaseOperation().fetchAllBooks(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(
@@ -116,7 +109,8 @@ class _BookListScreenState extends State<BookListScreen> {
                         author: bookData['author name'],
                         isAvailable: bookData['isAvailable'],
                       isRequested: bookData["isRequested"],
-                      allocatedTo: bookData["allocatedTo"],
+                      allocatedTo: bookData["allocatedTo"]??"",
+                      studentName: bookData["studentName"]??""
 
 
                       ))));

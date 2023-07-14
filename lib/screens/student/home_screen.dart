@@ -1,17 +1,19 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:library_portal/screens/registration/login.dart';
+import 'package:library_portal/screens/student/my_books_screen.dart';
+import 'package:library_portal/screens/student/requested_book_screen.dart';
 
 import '../../models/books_model.dart';
 import '../../models/library_model.dart';
 import '../admin/edit_book_screen.dart';
 import '../functions.dart';
-import 'bookdetail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
 String? userId;
+String? userEmail;
 
-HomeScreen(this.userId);
+HomeScreen(this.userId,this.userEmail);
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -31,8 +33,8 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: EdgeInsets.zero,
           children: <Widget>[
             UserAccountsDrawerHeader(
-              accountName: Text("Abhishek Mishra"),
-              accountEmail: Text("abhishekm977@gmail.com"),
+              accountName: Text(widget.userId??""),
+              accountEmail: Text(widget.userEmail??""),
               currentAccountPicture: CircleAvatar(
                 backgroundColor: Colors.orange,
                 child: Text(
@@ -42,15 +44,15 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             ListTile(
-              leading: Icon(Icons.home), title: Text("Home"),
+              leading: Icon(Icons.book_sharp), title: Text("My Books"),
               onTap: () {
-                Navigator.pop(context);
+                Navigator.push(context, MaterialPageRoute(builder: (context)=>MyBooksScreen(widget.userId)));
               },
             ),
             ListTile(
-              leading: Icon(Icons.settings), title: Text("Settings"),
+              leading: Icon(Icons.request_page), title: Text("Requested Books"),
               onTap: () {
-                Navigator.pop(context);
+                Navigator.push(context, MaterialPageRoute(builder: (context)=>RequestedBookScreen(widget.userId)));
               },
             ),
             ListTile(
@@ -95,7 +97,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         setState(() {
 
                         });
-                       await FirebaseOperation.updateBook(bookName: bookData['book name'], authorName: bookData['author name'], description: bookData['description'], isAvailable: bookData['isAvailable'], docId: snapshot.data?[index].id??"",isRequested: true,allocateTo: widget.userId);
+                       await FirebaseOperation.updateBook(bookName: bookData['book name'], authorName: bookData['author name'], description: bookData['description'], isAvailable: bookData['isAvailable'], docId: snapshot.data?[index].id??"",studentName: widget.userEmail,isRequested: true,allocateTo: widget.userId);
 
                       },
                       child: Text("Request To Get"),

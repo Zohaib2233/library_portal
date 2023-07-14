@@ -42,7 +42,8 @@ class LoginScreen extends StatelessWidget {
            print(getUserData.data()?.values.first);
            if(getUserData.data()?.values.first == false){
              print("student");
-             Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>HomeScreen(userId)));
+             Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>HomeScreen(userId,value.user?.email
+             )));
            }else{
              print("admin");
              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>BookListScreen()));

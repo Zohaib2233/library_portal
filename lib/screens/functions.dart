@@ -48,6 +48,7 @@ class FirebaseOperation {
     required bool isAvailable,
     bool isRequested = false,
     String? allocateTo,
+    String? studentName,
     Function? callBack,
   }) async {
     final CollectionReference _Collection = _firestore.collection('Book');
@@ -62,6 +63,7 @@ class FirebaseOperation {
       "isAvailable" : isAvailable,
       "isRequested": isRequested,
       "allocateTo" : allocateTo,
+      "studentName":studentName,
     };
 
     var result = await documentReferencer
@@ -91,8 +93,34 @@ class FirebaseOperation {
 
     return querySnapshot.docs;
   }
+
+  Future<List<QueryDocumentSnapshot<Map<String, dynamic>>>> fetchUserRequestedBooksWhere(String? uid) async {
+    QuerySnapshot<Map<String, dynamic>> querySnapshot = await FirebaseFirestore.instance
+        .collection('Book')
+        .where("isRequested",isEqualTo: true).where("allocateTo",isEqualTo: uid)
+        .get();
+
+    return querySnapshot.docs;
+  }
+  Future<List<QueryDocumentSnapshot<Map<String, dynamic>>>> fetchAllRequestedBooksWhere() async {
+    QuerySnapshot<Map<String, dynamic>> querySnapshot = await FirebaseFirestore.instance
+        .collection('Book')
+        .where("isRequested",isEqualTo: true).where("isAvailable",isEqualTo: true)
+        .get();
+
+    return querySnapshot.docs;
+  }
+
+  Future<List<QueryDocumentSnapshot<Map<String, dynamic>>>> fetchMyBooksWhere(String? uid) async {
+    QuerySnapshot<Map<String, dynamic>> querySnapshot = await FirebaseFirestore.instance
+        .collection('Book')
+        .where("isRequested",isEqualTo: false).where("allocateTo",isEqualTo: uid)
+        .get();
+
+    return querySnapshot.docs;
+  }
   //read all data
-  Future<List<QueryDocumentSnapshot<Map<String, dynamic>>>> fetchAvailableBooks() async {
+  Future<List<QueryDocumentSnapshot<Map<String, dynamic>>>> fetchAllBooks() async {
     QuerySnapshot<Map<String, dynamic>> querySnapshot = await FirebaseFirestore.instance
         .collection('Book')
         .get();
@@ -110,7 +138,9 @@ class FirebaseOperation {
     required String docId,
     required bool isRequested,
     String? allocateTo,
+    String? studentName,
     Function? callBack,
+
 
   }) async {
 
@@ -127,6 +157,8 @@ print(docId);
       "isAvailable" : isAvailable,
       "isRequested": isRequested,
       "allocateTo" : allocateTo,
+      "studentName":studentName,
+
     };
     print(data);
 
@@ -136,8 +168,7 @@ print(docId);
       response.code = 200;
       response.message = "Sucessfully updated Book";
       callBack!(response);
-    })
-        .catchError((e) {
+    }).catchError((e) {
       response.code = 500;
       response.message = e.toString();
       callBack!(response);
